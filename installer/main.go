@@ -21,7 +21,9 @@ const (
 var (
 	HomeDir                       = os.Getenv("HOME")
 	CustomBrewInstallFuncName     = "my_brew_install"
+	CustomBrewInstallFuncDef      = "function my_brew_cask_install()"
 	CustomBrewCaskInstallFuncName = "my_brew_cask_install"
+	CustomBrewCaskInstallFuncDef  = "function my_brew_cask_install()"
 	AliasPrefix                   = "alias "
 	KeywordBI                     = "bi"
 	KeywordBCI                    = "bci"
@@ -31,22 +33,33 @@ var (
 
 // Application supports dependency injection.
 type App struct {
-	FS rfs.FileSystem
-	IO rio.IOsystem
+	HomeDir     string
+	DotfilesDir string
+	ZshrcFile   string
+	FS          rfs.FileSystem
+	IO          rio.IOsystem
 }
 
 // NewApp returns a new App.
-func NewApp(actualFS rfs.FileSystem, actualIO rio.IOsystem) *App {
+func NewApp(
+	homedir string,
+	dotfilesdir string,
+	zshrcfile string,
+	actualFS rfs.FileSystem,
+	actualIO rio.IOsystem) *App {
 	return &App{
-		FS: actualFS,
-		IO: actualIO,
+		HomeDir:     homedir,
+		DotfilesDir: dotfilesdir,
+		ZshrcFile:   zshrcfile,
+		FS:          actualFS,
+		IO:          actualIO,
 	}
 }
 
 // cloneDotfilesRepo clones this repository to `$HOME/dotfiles`.
 // If `$HOME/dotfiles` already exists, this function does nothing.
 func (a *App) cloneDotfilesRepo() error {
-	dotfilesPath := fmt.Sprintf("%s/%s", HomeDir, DotfilesDir)
+	dotfilesPath := fmt.Sprintf("%s/%s", a.HomeDir, a.DotfilesDir)
 
 	// Check if directory already exists
 	_, err := a.FS.Stat(dotfilesPath)
@@ -72,7 +85,7 @@ func (a *App) cloneDotfilesRepo() error {
 // If `$HOME/.zshrc` does not exist, this function creates it.
 // If the aliases already exist, this function does nothing.
 func (a *App) installAlias() error {
-	zshrcPath := fmt.Sprintf("%s/%s", HomeDir, ZshrcFile)
+	zshrcPath := fmt.Sprintf("%s/%s", a.HomeDir, a.ZshrcFile)
 
 	// Create file if not exists
 	f, err := a.FS.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -88,29 +101,35 @@ func (a *App) installAlias() error {
 	}
 
 	// Check if functions already exist
-	if strings.Contains(string(content), CustomBrewInstallFuncName) || strings.Contains(string(content), CustomBrewCaskInstallFuncName) {
-		return fmt.Errorf("`%s` or `%s` function already exists in %s. Exiting", CustomBrewInstallFuncName, CustomBrewCaskInstallFuncName, ZshrcFile)
+	if strings.Contains(string(content), CustomBrewInstallFuncDef) || strings.Contains(string(content), CustomBrewCaskInstallFuncDef) {
+		return fmt.Errorf("`%s` or `%s` function is already defined in %s. Exiting", CustomBrewInstallFuncName, CustomBrewCaskInstallFuncName, a.ZshrcFile)
 	}
 
 	// Check if aliases already exist
 	if strings.Contains(string(content), AliasPrefixBI) || strings.Contains(string(content), AliasPrefixBCI) {
-		return fmt.Errorf("`bi` or `bci` alias already exists in %s. Exiting", ZshrcFile)
+		return fmt.Errorf("`bi` or `bci` alias already exists in %s. Exiting", a.ZshrcFile)
 	}
 
 	// Write functions to `$HOME/.zshrc`
-	bundleFilePath := fmt.Sprintf("%s/%s/%s", HomeDir, DotfilesDir, ".Brewfile")
+	bundleFilePath := fmt.Sprintf("%s/%s/%s", a.HomeDir, a.DotfilesDir, ".Brewfile")
 
-	_, err = f.WriteString(fmt.Sprintf(`function %s() {
-		brew install "$@"
-		brew bundle dump --force --file=%s
-	}`, CustomBrewInstallFuncName, bundleFilePath))
+	_, err = f.WriteString("\n\n# My Dotfiles installer functions\n")
+	if err != nil {
+		return fmt.Errorf("failed to write alias to '%s': due to %w", zshrcPath, err)
+	}
+	_, err = f.WriteString(fmt.Sprintf(`
+function %s() {
+	brew install "$@"
+	brew bundle dump --force --file=%s
+}`, CustomBrewInstallFuncName, bundleFilePath))
 	if err != nil {
 		return fmt.Errorf("failed to write function to '%s': due to %w", zshrcPath, err)
 	}
-	_, err = f.WriteString(fmt.Sprintf(`function %s() {
-		brew cask install "$@"
-		brew bundle dump --force --file=%s
-	}`, CustomBrewCaskInstallFuncName, bundleFilePath))
+	_, err = f.WriteString(fmt.Sprintf(`
+function %s() {
+	brew cask install "$@"
+	brew bundle dump --force --file=%s
+}`, CustomBrewCaskInstallFuncName, bundleFilePath))
 	if err != nil {
 		return fmt.Errorf("failed to write function to '%s': due to %w", zshrcPath, err)
 	}
@@ -134,7 +153,7 @@ func (a *App) installAlias() error {
 
 // brewBundle installs packages using `$HOME/dotfiles/.Brewfile`.
 func (a *App) brewBundle() error {
-	bundleFilePath := fmt.Sprintf("%s/%s/%s", HomeDir, DotfilesDir, ".Brewfile")
+	bundleFilePath := fmt.Sprintf("%s/%s/%s", a.HomeDir, a.DotfilesDir, ".Brewfile")
 
 	cmd := exec.Command(BrewCommand, "bundle", "--file", bundleFilePath)
 	cmd.Stdout = os.Stdout
@@ -148,7 +167,7 @@ func (a *App) brewBundle() error {
 
 // reloadZshrc reloads `$HOME/.zshrc` to apply the alias.
 func (a *App) reloadZshrc() error {
-	zshrcPath := fmt.Sprintf("%s/%s", HomeDir, ZshrcFile)
+	zshrcPath := fmt.Sprintf("%s/%s", a.HomeDir, a.ZshrcFile)
 
 	cmd := exec.Command("source", zshrcPath)
 	cmd.Stdout = os.Stdout
@@ -164,7 +183,12 @@ func main() {
 	log.Println("Start install dotfiles")
 
 	// 0. Initialize application
-	app := NewApp(rfs.RealFileSystem{}, rio.RealIOsystem{})
+	app := NewApp(
+		HomeDir,
+		DotfilesDir,
+		ZshrcFile,
+		rfs.RealFileSystem{},
+		rio.RealIOsystem{})
 
 	// 1. Clone this repository to `$HOME/dotfiles`.
 	if err := app.cloneDotfilesRepo(); err != nil {
