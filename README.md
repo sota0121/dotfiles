@@ -1,1 +1,56 @@
 # dotfiles
+
+## Why I use this repository
+
+- I want to manage my dotfiles in a single repository.
+- I want to install my dotfiles with a single command.
+- I want to install my dotfiles without git command.
+- I want to update and sync my dotfiles with a single command.
+
+## Features
+
+- [x] Provide `install.sh` to install dotfiles with a single command.
+- [x] Provide a custom brew install command `bi`.
+  - `bi` is a set of `brew install` and `brew bundle dump`.
+  - This command installs a formula and syncs `dotfiles/.Brewfile`.
+- [x] Provide a custom brew cask install command `bci`.
+  - `bci` is a set of `brew cask install` and `brew bundle dump`.
+  - This command installs a cask and syncs `dotfiles/.Brewfile`.
+
+
+## Usage
+
+### Install
+
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sota0121/dotfiles/main/install.sh)"
+```
+
+### Brew install and Sync .Brewfile
+
+```bash
+# custom brew install
+bi $formula
+
+# custom brew cask install
+bci $cask
+```
+
+### Git Push your latest dotfiles
+
+```bash
+cd $DOTFILES_DIR
+git add .
+git commit -m "update dotfiles"
+git push origin main
+```
+
+## What `install.sh` does
+
+1. Clone this repository to `$HOME/dotfiles`.
+   1. If the directory already exists, `install.sh` will exit.
+2. Install `bi` and `bci` commands to `$HOME/.zshrc` as alias.
+   1. If the alias already exists, `install.sh` will exit.
+3. Brew bundle install using `$HOME/dotfiles/.Brewfile`.
+4. Reload `$HOME/.zshrc` to apply the alias.
+
