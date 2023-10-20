@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 
-	rfs "github.com/sota0121/dotfiles/installer/fs"
-	rio "github.com/sota0121/dotfiles/installer/io"
+	rfs "github.com/sota0121/dotfiles/installer/sfs"
+	rio "github.com/sota0121/dotfiles/installer/sio"
 )
 
 const (
@@ -28,13 +27,19 @@ var (
 	AliasPrefixBCI = AliasPrefix + KeywordBCI + "="
 )
 
+// Dependency Injection
+var (
+	realFS = rfs.RealFileSystem{}
+	realIO = rio.RealIOsystem{}
+)
+
 // cloneDotfilesRepo clones this repository to `$HOME/dotfiles`.
 // If `$HOME/dotfiles` already exists, this function does nothing.
 func cloneDotfilesRepo() error {
 	dotfilesPath := fmt.Sprintf("%s/%s", HomeDir, DotfilesDir)
 
 	// Check if directory already exists
-	_, err := rfs.Stat(dotfilesPath)
+	_, err := realFS.Stat(dotfilesPath)
 	if os.IsExist(err) {
 		return fmt.Errorf("'%s' directory already exists", dotfilesPath)
 	}
@@ -60,14 +65,14 @@ func installAlias() error {
 	zshrcPath := fmt.Sprintf("%s/%s", HomeDir, ZshrcFile)
 
 	// Create file if not exists
-	f, err := rfs.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := realFS.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to open '%s': due to %w", zshrcPath, err)
 	}
 	defer f.Close()
 
 	// Check if aliases already exist
-	content, err := rio.ReadAll(f)
+	content, err := realIO.ReadAll(f)
 	if err != nil {
 		return fmt.Errorf("failed to read '%s': due to %w", zshrcPath, err)
 	}

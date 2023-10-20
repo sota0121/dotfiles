@@ -1,5 +1,5 @@
-//go:generate mockgen -source=$GOFILE -destination=mock/io_mock.go -package=mock
-package main
+//go:generate mockgen -source=$GOFILE -destination=./io_mock.go -package=$GOPACKAGE
+package sio
 
 import "io"
 

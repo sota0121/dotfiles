@@ -1,5 +1,5 @@
-//go:generate mockgen -source=$GOFILE -destination=mock/fs_mock.go -package=mock
-package main
+//go:generate mockgen -source=$GOFILE -destination=./fs_mock.go -package=$GOPACKAGE
+package sfs
 
 import (
 	"os"
