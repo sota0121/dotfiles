@@ -1,0 +1,1 @@
+alias bi="my_brew_install"

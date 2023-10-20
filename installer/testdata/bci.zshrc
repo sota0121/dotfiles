@@ -1,0 +1,1 @@
+alias bci="my_brew_cask_install"
