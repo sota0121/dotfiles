@@ -19,12 +19,14 @@ const (
 )
 
 var (
-	HomeDir        = os.Getenv("HOME")
-	AliasPrefix    = "alias "
-	KeywordBI      = "bi"
-	KeywordBCI     = "bci"
-	AliasPrefixBI  = AliasPrefix + KeywordBI + "="
-	AliasPrefixBCI = AliasPrefix + KeywordBCI + "="
+	HomeDir                       = os.Getenv("HOME")
+	CustomBrewInstallFuncName     = "my_brew_install"
+	CustomBrewCaskInstallFuncName = "my_brew_cask_install"
+	AliasPrefix                   = "alias "
+	KeywordBI                     = "bi"
+	KeywordBCI                    = "bci"
+	AliasPrefixBI                 = AliasPrefix + KeywordBI + "="
+	AliasPrefixBCI                = AliasPrefix + KeywordBCI + "="
 )
 
 // Dependency Injection
@@ -71,13 +73,38 @@ func installAlias() error {
 	}
 	defer f.Close()
 
-	// Check if aliases already exist
+	// Read contents
 	content, err := realIO.ReadAll(f)
 	if err != nil {
 		return fmt.Errorf("failed to read '%s': due to %w", zshrcPath, err)
 	}
+
+	// Check if functions already exist
+	if strings.Contains(string(content), CustomBrewInstallFuncName) || strings.Contains(string(content), CustomBrewCaskInstallFuncName) {
+		return fmt.Errorf("`%s` or `%s` function already exists in %s. Exiting", CustomBrewInstallFuncName, CustomBrewCaskInstallFuncName, ZshrcFile)
+	}
+
+	// Check if aliases already exist
 	if strings.Contains(string(content), AliasPrefixBI) || strings.Contains(string(content), AliasPrefixBCI) {
 		return fmt.Errorf("`bi` or `bci` alias already exists in %s. Exiting", ZshrcFile)
+	}
+
+	// Write functions to `$HOME/.zshrc`
+	bundleFilePath := fmt.Sprintf("%s/%s/%s", HomeDir, DotfilesDir, ".Brewfile")
+
+	_, err = f.WriteString(fmt.Sprintf(`function %s() {
+		brew install "$@"
+		brew bundle dump --force --file=%s
+	}`, CustomBrewInstallFuncName, bundleFilePath))
+	if err != nil {
+		return fmt.Errorf("failed to write function to '%s': due to %w", zshrcPath, err)
+	}
+	_, err = f.WriteString(fmt.Sprintf(`function %s() {
+		brew cask install "$@"
+		brew bundle dump --force --file=%s
+	}`, CustomBrewCaskInstallFuncName, bundleFilePath))
+	if err != nil {
+		return fmt.Errorf("failed to write function to '%s': due to %w", zshrcPath, err)
 	}
 
 	// Write alias to `$HOME/.zshrc`
@@ -85,11 +112,11 @@ func installAlias() error {
 	if err != nil {
 		return fmt.Errorf("failed to write alias to '%s': due to %w", zshrcPath, err)
 	}
-	_, err = f.WriteString(fmt.Sprintf("%s%s install\n", AliasPrefixBI, BrewCommand))
+	_, err = f.WriteString(fmt.Sprintf("%s \"%s\"\n", AliasPrefixBI, CustomBrewInstallFuncName))
 	if err != nil {
 		return fmt.Errorf("failed to write alias to '%s': due to %w", zshrcPath, err)
 	}
-	_, err = f.WriteString(fmt.Sprintf("%s%s cask install\n", AliasPrefixBCI, BrewCommand))
+	_, err = f.WriteString(fmt.Sprintf("%s \"%s\"\n", AliasPrefixBCI, CustomBrewCaskInstallFuncName))
 	if err != nil {
 		return fmt.Errorf("failed to write alias to '%s': due to %w", zshrcPath, err)
 	}
