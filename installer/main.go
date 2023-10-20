@@ -29,19 +29,27 @@ var (
 	AliasPrefixBCI                = AliasPrefix + KeywordBCI + "="
 )
 
-// Dependency Injection
-var (
-	realFS = rfs.RealFileSystem{}
-	realIO = rio.RealIOsystem{}
-)
+// Application supports dependency injection.
+type App struct {
+	FS rfs.FileSystem
+	IO rio.IOsystem
+}
+
+// NewApp returns a new App.
+func NewApp(actualFS rfs.FileSystem, actualIO rio.IOsystem) *App {
+	return &App{
+		FS: actualFS,
+		IO: actualIO,
+	}
+}
 
 // cloneDotfilesRepo clones this repository to `$HOME/dotfiles`.
 // If `$HOME/dotfiles` already exists, this function does nothing.
-func cloneDotfilesRepo() error {
+func (a *App) cloneDotfilesRepo() error {
 	dotfilesPath := fmt.Sprintf("%s/%s", HomeDir, DotfilesDir)
 
 	// Check if directory already exists
-	_, err := realFS.Stat(dotfilesPath)
+	_, err := a.FS.Stat(dotfilesPath)
 	if os.IsExist(err) {
 		return fmt.Errorf("'%s' directory already exists", dotfilesPath)
 	}
@@ -63,18 +71,18 @@ func cloneDotfilesRepo() error {
 // installAlias installs `bi` and `bci` commands to `$HOME/.zshrc` as alias.
 // If `$HOME/.zshrc` does not exist, this function creates it.
 // If the aliases already exist, this function does nothing.
-func installAlias() error {
+func (a *App) installAlias() error {
 	zshrcPath := fmt.Sprintf("%s/%s", HomeDir, ZshrcFile)
 
 	// Create file if not exists
-	f, err := realFS.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := a.FS.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to open '%s': due to %w", zshrcPath, err)
 	}
 	defer f.Close()
 
 	// Read contents
-	content, err := realIO.ReadAll(f)
+	content, err := a.IO.ReadAll(f)
 	if err != nil {
 		return fmt.Errorf("failed to read '%s': due to %w", zshrcPath, err)
 	}
@@ -125,7 +133,7 @@ func installAlias() error {
 }
 
 // brewBundle installs packages using `$HOME/dotfiles/.Brewfile`.
-func brewBundle() error {
+func (a *App) brewBundle() error {
 	bundleFilePath := fmt.Sprintf("%s/%s/%s", HomeDir, DotfilesDir, ".Brewfile")
 
 	cmd := exec.Command(BrewCommand, "bundle", "--file", bundleFilePath)
@@ -139,7 +147,7 @@ func brewBundle() error {
 }
 
 // reloadZshrc reloads `$HOME/.zshrc` to apply the alias.
-func reloadZshrc() error {
+func (a *App) reloadZshrc() error {
 	zshrcPath := fmt.Sprintf("%s/%s", HomeDir, ZshrcFile)
 
 	cmd := exec.Command("source", zshrcPath)
@@ -155,26 +163,29 @@ func reloadZshrc() error {
 func main() {
 	log.Println("Start install dotfiles")
 
+	// 0. Initialize application
+	app := NewApp(rfs.RealFileSystem{}, rio.RealIOsystem{})
+
 	// 1. Clone this repository to `$HOME/dotfiles`.
-	if err := cloneDotfilesRepo(); err != nil {
+	if err := app.cloneDotfilesRepo(); err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	// 2. Install `bi` and `bci` commands to `$HOME/.zshrc` as alias.
-	if err := installAlias(); err != nil {
+	if err := app.installAlias(); err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	// 3. Brew bundle install using `$HOME/dotfiles/.Brewfile`.
-	if err := brewBundle(); err != nil {
+	if err := app.brewBundle(); err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	// 4. Reload `$HOME/.zshrc` to apply the alias.
-	reloadZshrc()
+	app.reloadZshrc()
 
 	log.Println("Finish install dotfiles")
 }
