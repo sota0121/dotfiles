@@ -1,65 +1,36 @@
-#! /bin/zsh
+#!/bin/sh
 
-# Prepare to set environment variables
-## If the environment variables are already set, confirm to overwrite them
-if [ -n "$MY_DOTFILES_DIR" ]; then
-  echo "Overwrite environment variables (MY_DOTFILES_DIR) ? [y/n]"
-  read answer
-  if [ $answer = "y" ]; then
-    unset MY_DOTFILES_DIR
-  else
-    echo "Exit"
-    exit 1
-  fi
-fi
+set -e
 
+GITHUB_REPO="sota0121/dotfiles"
+# *バージョン指定の柔軟性や、各リリースのURIを自動取得するために GitHub APIを利用する
+LATEST_RELEASE_URL="https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 
-# Set environment variables
-MY_DOTFILES_DIR=~/dotfiles
+# 1. 必要なツールの確認
+command -v curl >/dev/null 2>&1 || { echo "Error: curl is not installed"; exit 1; }
+command -v tar >/dev/null 2>&1 || { echo "Error: tar is not installed"; exit 1; }
 
-# Prepare to clone the repository
-## If ~/dotfiles dir already exists, confirm to remove it
-if [ -d ~/dotfiles ]; then
-  echo "Remove ~/dotfiles dir? [y/n]"
-  read answer
-  if [ $answer = "y" ]; then
-    rm -rf ~/dotfiles
-  else
-    echo "Exit"
-    exit 1
-  fi
-fi
-
-# Clone the repository
-git clone git@github.com:sota0121/dotfiles.git ~/dotfiles
-
-# Prepare to install `bi` and `bci` commands
-## If `bi` and `bci` aliases already exist, confirm to overwrite them
-if [ -n "$(alias | grep bi)" ]; then
-  echo "Overwrite aliases (bi, bci) ? [y/n]"
-  read answer
-  if [ $answer = "y" ]; then
-    unalias bi
-    unalias bci
-  else
-    echo "Exit"
-    exit 1
-  fi
-fi
-
-
-# Install `bi` and `bci` commands
-echo 'function bi() {
-    brew install "$@"
-    brew bundle dump --force --file=
+# 2. GitHubのリリースからバイナリのダウンロード
+download_url() {
+  curl -s $LATEST_RELEASE_URL | grep "browser_download_url.*installer-$OS-$ARCH" | cut -d '"' -f 4
 }
 
-# dotfilesのクローン
-git clone [your-dotfiles-repo-url] ~/dotfiles
+download_binary() {
+  local download_url="$1"
+  echo "Downloading binary from $download_url"
+  curl -LO $download_url
+}
 
-# .zshrcにmy_brew_install関数を追加
-echo 'function my_brew_install() {
-    brew install "$@"
-    brew bundle dump --force --file=~/dotfiles/.Brewfile
-}' >> ~/.zshrc
-echo 'alias bi="my_brew_install"' >> ~/.zshrc
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+
+download_url=$(download_url)
+download_binary "$download_url"
+
+# 3. ダウンロードしたバイナリの検証や実行
+# 例: tarでバイナリを解凍し、インストーラを実行する
+tar -xzf installer-$OS-$ARCH
+./installer
+
+# 4. 後片付け
+rm installer-$OS-$ARCH
