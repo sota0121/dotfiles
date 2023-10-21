@@ -1,4 +1,4 @@
-.PHONY: build run test generate mod-tidy go-get
+.PHONY: build xbuild run test generate mod-tidy go-get
 
 BIN_DIR = bin
 INSTALLER_NAME = installer
@@ -9,6 +9,15 @@ build: mod-tidy go-get generate test
 	@echo "Building installer..."
 	@go build -o $(BIN_DIR)/$(INSTALLER_NAME) $(INSTALLER_PATH)
 	@echo "Installer built successfully!"
+
+xbuild: mod-tidy go-get generate test
+	@echo "Building installer for linux..."
+	@GOOS=linux GOARCH=amd64 go build -o $(BIN_DIR)/$(INSTALLER_NAME)_linux_amd64 $(INSTALLER_PATH)
+	@echo "Installer for linux built successfully!"
+	@echo "Building installer for darwin..."
+	@GOOS=darwin GOARCH=amd64 go build -o $(BIN_DIR)/$(INSTALLER_NAME)_darwin_amd64 $(INSTALLER_PATH)
+	@GOOS=darwin GOARCH=arm64 go build -o $(BIN_DIR)/$(INSTALLER_NAME)_darwin_arm64 $(INSTALLER_PATH)
+	@echo "Installer for darwin built successfully!"
 
 run:
 	@echo "Running installer..."
