@@ -1,16 +1,19 @@
-.PHONY: build xbuild run test generate mod-tidy go-get
+.PHONY: build xbuild run test generate mod-tidy go-get go-install
 
 BIN_DIR = bin
 INSTALLER_NAME = installer
 INSTALLER_PATH = ./main.go
 TARGET_PRIVATE_MODULES = github.com/sota0121
 
+MOCKGEN_VERSION = v1.6.0
+
 build: mod-tidy go-get generate test
 	@echo "Building installer..."
 	@go build -o $(BIN_DIR)/$(INSTALLER_NAME) $(INSTALLER_PATH)
 	@echo "Installer built successfully!"
 
-xbuild: mod-tidy go-get generate test
+# Cross build for building release artifacts on CI
+xbuild: mod-tidy go-get go-install generate test
 	@echo "Building installer for linux..."
 	@GOOS=linux GOARCH=amd64 go build -o $(BIN_DIR)/$(INSTALLER_NAME)_linux_amd64 $(INSTALLER_PATH)
 	@echo "Installer for linux built successfully!"
@@ -42,3 +45,8 @@ go-get:
 	@echo "Getting private go modules..."
 	GOPRIVATE=$(TARGET_PRIVATE_MODULES) go get -u
 	@echo "Go modules got successfully!"
+
+go-install:
+	@echo "Installing mockgen..."
+	@go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
+	@echo "Mockgen installed successfully!"
