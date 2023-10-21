@@ -1,0 +1,20 @@
+# Automatically generated release notes settings
+# See: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+# The following settings are used to configure the release notes generated
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+    - title: "🚀 Breaking Changes"
+      labels:
+        - enhancement
+    - title: "🐛 Bug Fixes"
+      labels:
+        - bug
+    - title: "⚒️ Other Changes"
+      labels:
+        - "*"
