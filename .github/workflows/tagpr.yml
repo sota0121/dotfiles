@@ -1,0 +1,25 @@
+
+# See: https://github.com/Songmu/tagpr
+# How to use tagpr: https://songmu.jp/riji/entry/2022-09-05-tagpr.html
+
+# Basic usage:
+# 1. (自動) mainブランチが進むとリリース用のpull requestが作られる
+#     - mainブランチの先頭からブランチングされる
+#     - mainブランチが更に進むと自動で追随する
+# 2. 1で出来たブランチに必要なら更新を加える
+# 3. pull requestを好きなタイミングでマージする
+# 4. (自動) タグが打たれ、GitHub Releasesも作られる
+
+name: tagpr
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Songmu/tagpr@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,11 @@
+# EditorConfig is awesome: https://EditorConfig.org
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+[*.{js,jsx,ts,tsx,py,html,css,scss,yaml,yml,json,md,mdx}]
+indent_style = space
+indent_size = 2
