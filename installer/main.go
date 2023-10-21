@@ -21,7 +21,7 @@ const (
 var (
 	HomeDir                       = os.Getenv("HOME")
 	CustomBrewInstallFuncName     = "my_brew_install"
-	CustomBrewInstallFuncDef      = "function my_brew_cask_install()"
+	CustomBrewInstallFuncDef      = "function my_brew_install()"
 	CustomBrewCaskInstallFuncName = "my_brew_cask_install"
 	CustomBrewCaskInstallFuncDef  = "function my_brew_cask_install()"
 	AliasPrefix                   = "alias "
