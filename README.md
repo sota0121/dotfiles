@@ -45,6 +45,14 @@ git commit -m "update dotfiles"
 git push origin main
 ```
 
+### Install brew pkgs with latest .Brewfile
+
+```bash
+cd $DOTFILES_DIR
+brew bundle install --file .Brewfile
+```
+
+
 ## What `install.sh` does
 
 1. Clone this repository to `$HOME/dotfiles`.
