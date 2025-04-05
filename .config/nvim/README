@@ -1,0 +1,20 @@
+## Folder structure
+
+e.g.
+~/.config/nvim/
+├── init.lua               # メインの設定ファイル
+├── lua/                   # Luaスクリプトを格納するディレクトリ
+│   ├── plugins/           # プラグイン設定を格納
+│   │   ├── init.lua       # プラグインマネージャの設定 (Lazy.nvim)
+│   │   ├── telescope.lua  # Telescopeプラグインの設定
+│   │   ├── lualine.lua    # Lualineプラグインの設定
+│   │   └── treesitter.lua # Treesitterプラグインの設定
+│   ├── settings.lua       # 基本設定（例: 行番号、インデント）
+│   ├── keymaps.lua        # キーマッピング設定
+│   └── lsp/               # LSP関連の設定を格納
+│       ├── init.lua       # LSP全体の初期設定
+│       ├── servers.lua    # 各LSPサーバーの設定 (例: pyright, tsserver)
+│       └── format.lua     # フォーマット設定
+└── after/                 # 特定の条件で適用される設定
+    ├── ftplugin/          # ファイルタイプごとの設定 (例: PythonやMarkdown用)
+    └── plugin/            # プラグインの読み込み後に適用する設定
