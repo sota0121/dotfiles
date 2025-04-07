@@ -10,9 +10,9 @@ vim.keymap.set("n", "<C-n>", ":NvimTreeToggle<CR>", { noremap = true, silent = t
 
 -- Telescope検索
 -- * search files including hidden files
-local builtin = require("telescope.builtin")
+-- [TODO] this still does not work
 vim.keymap.set("n", "<C-p>", function()
-    builtin.find_files({
+    require("telescope.builtin").find_files({
         hidden = true,
         file_ignore_patterns = { ".git/", "node_modules/", ".cache/", ".DS_Store" },
     })
