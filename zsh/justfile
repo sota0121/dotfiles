@@ -1,0 +1,27 @@
+default:
+  just --list
+
+# Show readme message
+readme:
+    @echo "📖 Justfile for managing zsh configuration files"
+    @echo "Run 'just' to learn what commands are available."
+    @echo "--------------------------"
+    @echo "Don't worry about oh-my-zsh, all oh-my-zsh configs are written in ~/.zshrc"
+    @echo "--------------------------"
+
+# Get the current hostname
+hostname := shell('hostname')
+dotfiles_dir := shell('pwd') + "/" + hostname
+
+# Backup zsh-related files from home directory to dotfiles/zsh/$hostname
+backup-zsh:
+    @echo "📦 Backing up zsh files from home to {{dotfiles_dir}}"
+    mkdir -p {{dotfiles_dir}}
+    cp ~/.zshrc {{dotfiles_dir}}/.zshrc
+    @echo "✅ Backup complete"
+
+# Install zsh-related files from dotfiles/zsh/$hostname to home directory (WARNING: This will overwrite existing files) Automatically run backup-zsh before installing
+install-zsh: backup-zsh
+    @echo "🔧 Installing zsh files from dotfiles/zsh/{{hostname}} to home"
+    cp {{dotfiles_dir}}/.zshrc ~/.zshrc
+    @echo "✅ Install complete"
