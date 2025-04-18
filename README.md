@@ -7,6 +7,32 @@
 - I want to install my dotfiles without git command.
 - I want to update and sync my dotfiles with a single command.
 
+## Summary
+
+1. This repository is a collection of my dotfiles.
+2. This repository provides a script to install or backup my dotfiles.
+
+## Prerequisites
+
+- [Git](https://git-scm.com)
+- [Homebrew](https://brew.sh)
+- [Just](https://just.systems/man/en/introduction.html)
+  - `brew install just`
+
+## Targets
+
+- .config/nvim : manual symlink
+- ~/.zshrc : see `just zsh`
+- ~/.Brewfile : see `just brew`
+
+## Task runner
+
+- Please run `just` command to see how to use this repository.
+
+---
+
+# Old README
+
 ## Features
 
 - [x] Provide `install.sh` to install dotfiles with a single command.

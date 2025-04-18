@@ -19,6 +19,10 @@ const (
 )
 
 var (
+	DEPRECATED = true
+)
+
+var (
 	HomeDir                       = os.Getenv("HOME")
 	CustomBrewInstallFuncName     = "my_brew_install"
 	CustomBrewInstallFuncDef      = "function my_brew_install()"
@@ -180,6 +184,12 @@ func (a *App) reloadZshrc() error {
 }
 
 func main() {
+	if DEPRECATED {
+		log.Println("This tool is deprecated. Please see the README for more information.")
+		// finish this app here
+		return
+	}
+
 	log.Println("Start install dotfiles")
 
 	// 0. Initialize application

@@ -1,0 +1,42 @@
+# ref: https://gist.github.com/JoeyBurzynski/cbab8361c59a720d60f83c20e8b21e20
+
+# Global variables
+TEMP_BACKUP_FILEPATH := "$(pwd)/$(date +%Y%m%d_%H%M%S)_Brewfile.tmp.backup"
+
+# README command that provides how to use this justfile to users and developers
+default:
+  @just --list
+
+# backup installed dependencies to a Brewfile specified by the user (default: $pwd/YYYYMMDD_HHMMSS_Brewfile.tmp.backup)
+backup brewfile_path=TEMP_BACKUP_FILEPATH:
+  @echo "📦 Backing up installed dependencies to Brewfile at {{brewfile_path}}"
+  brew bundle dump --file={{brewfile_path}} --force
+  @echo "✅ Backup complete"
+
+# restore installed dependencies from a Brewfile specified by the user
+restore brewfile_path: (backup TEMP_BACKUP_FILEPATH)
+  @echo "🔧 Restoring the dependencies from specified Brewfile at {{brewfile_path}}"
+  brew bundle --file={{brewfile_path}}
+  @echo "✅ Restore complete"
+
+# list
+list:
+  @echo "📜 Listing all dependencies present in the Brewfile"
+  brew bundle list
+
+# check
+check:
+  @echo "🔍 Checking if all dependencies are installed from the Brewfile"
+  brew bundle check
+
+
+# cleanup - positional arg1: true/false if true, 'cleanup --force' is executed
+cleanup enforce: (backup TEMP_BACKUP_FILEPATH)
+  #! /bin/bash
+  echo "🧹 Cleaning up any dependencies installed, but not listed in the Brewfile"
+  if [ {{enforce}} = "true" ]; then
+    brew bundle cleanup --force
+  else
+    brew bundle cleanup
+  fi
+  echo "✅ Cleanup complete"
