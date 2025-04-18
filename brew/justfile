@@ -1,7 +1,7 @@
 # ref: https://gist.github.com/JoeyBurzynski/cbab8361c59a720d60f83c20e8b21e20
 
 # Global variables
-TEMP_BACKUP_FILEPATH := "$(pwd)/$(date +%Y%m%d_%H%M%S)_Brewfile.tmp.backup"
+TEMP_BACKUP_FILEPATH := "$(pwd)/$(date +%Y%m%d_%H%M%S)_$(hostname)_Brewfile.tmp.backup"
 
 # README command that provides how to use this justfile to users and developers
 default:
