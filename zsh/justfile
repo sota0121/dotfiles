@@ -1,3 +1,7 @@
+# Global variables
+LATEST_ZSHRC_FILEPATH := "$(pwd)/$(hostname)/.zshrc"
+TEMP_BACKUP_FILEPATH := "$(pwd)/$(hostname)/$(date +%Y%m%d_%H%M%S)_bk_zshrc"
+
 # README command that provides how to use this justfile to users and developers
 default:
   @just --list
@@ -10,19 +14,15 @@ readme:
     @echo "Don't worry about oh-my-zsh, all oh-my-zsh configs are written in ~/.zshrc"
     @echo "--------------------------"
 
-# Get the current hostname
-hostname := shell('hostname')
-dotfiles_dir := shell('pwd') + "/" + hostname
-
 # Backup zsh-related files from home directory to dotfiles/zsh/$hostname
-backup-zsh:
-    @echo "📦 Backing up zsh files from home to {{dotfiles_dir}}"
-    mkdir -p {{dotfiles_dir}}
-    cp ~/.zshrc {{dotfiles_dir}}/.zshrc
+backup-zsh zshrc_path=TEMP_BACKUP_FILEPATH:
+    @echo "📦 Backing up zsh files from home to {{zshrc_path}}"
+    mkdir -p {{zshrc_path}}
+    cp ~/.zshrc {{zshrc_path}}
     @echo "✅ Backup complete"
 
 # Install zsh-related files from dotfiles/zsh/$hostname to home directory (WARNING: This will overwrite existing files) Automatically run backup-zsh before installing
-install-zsh: backup-zsh
-    @echo "🔧 Installing zsh files from dotfiles/zsh/{{hostname}} to home"
-    cp {{dotfiles_dir}}/.zshrc ~/.zshrc
+install-zsh: (backup-zsh TEMP_BACKUP_FILEPATH)
+    @echo "🔧 Installing zsh files from {{LATEST_ZSHRC_FILEPATH}} to home"
+    cp {{LATEST_ZSHRC_FILEPATH}} ~/.zshrc
     @echo "✅ Install complete"
