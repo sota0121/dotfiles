@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.4](https://github.com/sota0121/dotfiles/compare/v0.0.3...v0.0.4) - 2025-09-01
+### ⚒️ Other Changes
+- asdf reshim nodejs automatically by @sota0121 in https://github.com/sota0121/dotfiles/pull/15
+- revert ceda60e3 by @sota0121 in https://github.com/sota0121/dotfiles/pull/17
+
 ## [v0.0.3](https://github.com/sota0121/dotfiles/compare/v0.0.2...v0.0.3) - 2025-08-25
 ### ⚒️ Other Changes
 - add toolversion file for asdf by @sota0121 in https://github.com/sota0121/dotfiles/pull/11
