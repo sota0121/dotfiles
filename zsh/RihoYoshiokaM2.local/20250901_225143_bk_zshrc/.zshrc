@@ -238,11 +238,6 @@ fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 # initialise completions with ZSH's compinit
 autoload -Uz compinit && compinit
 
-# asdf nodejs setting
-# to avoid issues "command not found" when installing global packages without reshim
-alias npm='npm "$@"; if [[ "$1" == "install" && "$@" == *"-g"* ]]; then asdf reshim nodejs; fi'
-alias yarn='yarn "$@"; if [[ "$1" == "global" && "$2" == "add" ]]; then asdf reshim nodejs; fi'
-
 # ==========================================
 # tmux conf loading
 # ==========================================
