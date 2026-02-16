@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.0.4](https://github.com/sota0121/dotfiles/compare/v0.0.3...v0.0.4) - 2026-02-16
+### ⚒️ Other Changes
+- asdf reshim nodejs automatically by @sota0121 in https://github.com/sota0121/dotfiles/pull/15
+- revert ceda60e3 by @sota0121 in https://github.com/sota0121/dotfiles/pull/17
+- add shortcat for better experience / rm whalebrew to avoid just backup cmd error by @sota0121 in https://github.com/sota0121/dotfiles/pull/18
+- backup brewfile by @sota0121 in https://github.com/sota0121/dotfiles/pull/19
+- backup brewfile on mf pc by @sota0121 in https://github.com/sota0121/dotfiles/pull/20
+
 ## [v0.0.3](https://github.com/sota0121/dotfiles/compare/v0.0.2...v0.0.3) - 2025-08-25
 ### ⚒️ Other Changes
 - add toolversion file for asdf by @sota0121 in https://github.com/sota0121/dotfiles/pull/11
