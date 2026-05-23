@@ -11,8 +11,15 @@
 #   - ./${module_name}/justfile
 #   - ./${module_name}/.justfile
 # ----------------------------------------------------------------------------
-# config module imported (run "just config" to see the commands in this module)
-mod config
+# brew module imported (run "just brew" to see the commands in this module)
+mod brew
+
+# mise-global module imported (run "just mise-global" to see the commands in this module)
+mod mise-global
+
+# zsh module imported (run "just zsh" to see the commands in this module)
+mod zsh
+
 
 # README command that provides how to use this repository to users and developers
 default:
@@ -20,6 +27,9 @@ default:
   @echo "This repository contains configuration files for various applications."
   @echo "---------------------------------------------------------------"
   @just --list
+  @echo "---------------------------"
+  @echo "iTerm - Manual backup with GUI"
+  @echo "Raycast - Manual backup with GUI"
   @echo "---------------------------------------------------------------"
   @echo "There are 2 ways to run just recipes:"
   @echo "1. just <recipe> - Run a specific recipe. it's like Makefile experience."
